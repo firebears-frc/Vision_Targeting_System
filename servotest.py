@@ -8,4 +8,4 @@ while True:
     x = int(input('Number: '))
 ##    y = int(input('Number2: '))
 ##    pwm.set_pwm(2,0,x)
-    pwm.set_pwm(1,0,x)
+    pwm.set_pwm(2,0,x)

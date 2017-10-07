@@ -6,39 +6,27 @@ from grip import VisionPipeline
 
 import Adafruit_PCA9685
 
-#0 to 180
-xMin = 200
-xMax = 650
-
-
-#Horizontal to 90
-yMin = 217
-yMax = 450
-
-degreetotick = (xMin - xMax) 
-
-
+xMin = 175 #0 to 180
+xMax = 615
+yMin = 217#0 to 90
+yMax = 430
+degreetotickx =  (xMax -xMin)
+op = (degreetotickx / (xMax - xMin))
+print(op)
+degreetoticky =  90/(yMax - yMin)
 pwmM = .75
-
 xshift = 400
 yshift = 217
 
-
-
-
-
 fovx = 60
-fovy = 45
+fovy = 50
 angley = 0
-
-
 
 def find_angle(pixel, resolution, fov):
     center = pixel - (resolution / 2)
     ratio = center * (math.sin(.5 * fov) / (.5 * resolution))
     radians = math.asin(ratio)
     out = (180 / math.pi) * radians
-##    print(out)
     return out
 
 def fa(pixel, resolution, fov):
@@ -49,7 +37,6 @@ def fa(pixel, resolution, fov):
 pwm = Adafruit_PCA9685.PCA9685()
 
 pwm.set_pwm_freq(60)
-
 
 # Initialize servos
 # Initialize opcv
