@@ -8,6 +8,8 @@ import Adafruit_PCA9685
 
 xtickMin = 175 #0 to 180
 xtickMax = 615
+
+
 ytickMin = 217#0 to 90
 ytickMax = 430
 
@@ -27,9 +29,9 @@ v2 = ( xtick * 2 ) + xtickMin
 
 
 def angletotick(xangle):
-    xo = xangletotick * xangle
-##    print("Angle: ",xangle)
-    return xo
+    xo = 2.44 * -xangle + 385 ##xangletotick 
+##    print("Tick: ",int(xo))
+    return int(xo)
 
 ##print(angletotick(30))
 
@@ -49,10 +51,11 @@ angley = 0
 
 def find_angle(pixel, resolution, fov):
     center = pixel - (resolution / 2)
-    ratio = center * (math.sin(.5 * fov) / (.5 * resolution))
+    fovtoradains = (math.pi/180) * fov
+    ratio = center * (math.sin(.5 * fovtoradains) / (.5 * resolution))
     radians = math.asin(ratio)
     out = (180 / math.pi) * radians
-    print("Angle: ", radians)
+    print("Angle: ", int(out), "Pixel :" , pixel)
     return out
 
 def fa(pixel, resolution, fov):
@@ -127,10 +130,9 @@ while cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
 ##    pwmx = (find_angle(center_x, resolutionx, fovx) * pwmM) + xshift
     
     # Set servos to values
-##    pwm.set_pwm(1,0,int(angletotick(find_angle(center_x, resolutionx, fovx))))
-    pwm.set_pwm(2,0,int(pwmy))
+    pwm.set_pwm(1,0,angletotick(find_angle(center_x, resolutionx, fovx)))
+    ##pwm.set_pwm(2,0,int(pwmy))
 ##    print(angletotick(find_angle(center_x, resolutionx, fovx)))
-    angletotick(find_angle(center_x, resolutionx, fovx))
 # Loop over
 print ('Pre-camera release')
 cap.release()
