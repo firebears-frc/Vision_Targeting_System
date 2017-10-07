@@ -19,7 +19,7 @@ xservorange = 180
 xtickrange = xtickMax - xtickMin
 xMiddle = xtickrange / 2
 xoffset = xMiddle + xtickMin
-xfovtickRange = xtickrange * (fovx/xservorange) ##180 is total range of servo
+xfovtickRange = xtickrange * (fovx/xservorange) ##180 is total range of servo in x
 xticktoFov = xfovtickRange  / fovx
 
 #ticks 0 to  90
@@ -117,7 +117,7 @@ while cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
         
     # Set servos to values
     pwm.set_pwm(1,0,angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
-    pwm.set_pwm(2,0,angletotick(find_angle(center_y, resolutiony, fovy), yoffset, yticktoFov, 1))
+    pwm.set_pwm(2,0,angletotick(angley, yoffset, yticktoFov, 1))
 # Loop over
 print ('Pre-camera release')
 cap.release()
