@@ -64,7 +64,7 @@ pwm.set_pwm_freq(60)
 pipeline = VisionPipeline()
 WINDOW_NAME = "Vision Targeting"
 # Initialize window
-#cv2.namedWindow(WINDOW_NAME)
+cv2.namedWindow(WINDOW_NAME)
 # Initialize camera
 cap = cv2.VideoCapture(0)
 while not cap.isOpened():
@@ -75,11 +75,11 @@ print ("Capture opened")
 
 os.system("v4l2-ctl --set-ctrl=exposure_auto=1")
 os.system("v4l2-ctl --set-ctrl=exposure_absolute=60")
-while True: #cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
+while cv2.getWindowProperty(WINDOW_NAME, 1) != -1: #True:
     # While the window has not been closed
     
     # Push image to window
-   # cv2.imshow(WINDOW_NAME, image)
+    cv2.imshow(WINDOW_NAME, image)
     cv2.waitKey(10)
     # Read image from the camera
     read, image = cap.read()
