@@ -6,14 +6,39 @@ from grip import VisionPipeline
 
 import Adafruit_PCA9685
 
-xMin = 175 #0 to 180
-xMax = 615
-yMin = 217#0 to 90
-yMax = 430
-degreetotickx =  (xMax -xMin)
-op = (degreetotickx / (xMax - xMin))
-print(op)
-degreetoticky =  90/(yMax - yMin)
+xtickMin = 175 #0 to 180
+xtickMax = 615
+ytickMin = 217#0 to 90
+ytickMax = 430
+
+xtickrange = xtickMax - xtickMin
+#range of xservo in ticks 0 to 180
+
+xtick = ( 60/180 ) * xtickrange
+#xtick should be 1/3 of the range
+
+xangletotick = xtick / 60 #Need to change the 60 value to fov
+
+
+v1 = xtick + xtickMin
+v2 = ( xtick * 2 ) + xtickMin
+
+##print(v1, v2)
+
+
+def angletotick(xangle):
+    xo = xangletotick * xangle
+##    print("Angle: ",xangle)
+    return xo
+
+##print(angletotick(30))
+
+
+##degreetotickx =  (xMax -xMin)
+##op = (degreetotickx / (xMax - xMin))
+##print(op)
+##degreetoticky =  90/(yMax - yMin)
+
 pwmM = .75
 xshift = 400
 yshift = 217
@@ -27,6 +52,7 @@ def find_angle(pixel, resolution, fov):
     ratio = center * (math.sin(.5 * fov) / (.5 * resolution))
     radians = math.asin(ratio)
     out = (180 / math.pi) * radians
+    print("Angle: ", radians)
     return out
 
 def fa(pixel, resolution, fov):
@@ -98,12 +124,13 @@ while cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
     
     # Convert angle to servos values
     pwmy = (angley * pwmM) + yshift
-    pwmx = (find_angle(center_x, resolutionx, fovx) * pwmM) + xshift
+##    pwmx = (find_angle(center_x, resolutionx, fovx) * pwmM) + xshift
     
     # Set servos to values
-    pwm.set_pwm(1,0,int(pwmx))
+##    pwm.set_pwm(1,0,int(angletotick(find_angle(center_x, resolutionx, fovx))))
     pwm.set_pwm(2,0,int(pwmy))
-   
+##    print(angletotick(find_angle(center_x, resolutionx, fovx)))
+    angletotick(find_angle(center_x, resolutionx, fovx))
 # Loop over
 print ('Pre-camera release')
 cap.release()
