@@ -5,12 +5,26 @@ from grip import VisionPipeline
 
 import Adafruit_PCA9685
 
+
+fovx = 60
+fovy = 45
+angley = 0
+
+def find_angle(pixel, resolution, fov):
+##    print(pixel, resolution, fov)
+    center = pixel - (resolution / 2)
+    ratio = center * (math.sin(.5 * fov) / (.5 * resolution))
+    radians = math.asin(ratio)
+    angle = (180 / math.pi) * radians
+    print(angle)
+    
+##    angle = (180 / math.pi) * (math.asin(pixel - (resolution / 2)) * ((math.sin(.5 * fov))/(.5 * resolution))) + (0.5*fovx)
+    return angle
+
 pwm = Adafruit_PCA9685.PCA9685()
 
 pwm.set_pwm_freq(60)
 
-#import Adafruit_PCA9685
-#import pin_output_library
 
 # Initialize servos
 # Initialize opcv
@@ -56,40 +70,50 @@ while cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
     center_y = int(hull_moment['m01']/hull_moment['m00'])
     cv2.circle(image,(center_x, center_y), 20, (0,0,0))
     
-    fovx = 60
-    fovy = 45
-    y4 = 0
+    #Init for vision angles to pwm
+   
+    
+    
+##    #Convert the field of view from anlges to radains
+##    fovRx = (math.pi/180) * fovx
+##    fovRy = (math.pi/180) * fovy
+##    
+##    #Get values from the camera and convert them into negative and positve
+##    x2 = center_x - (resolutionx / 2)
+##    #Input the values above and finds the side of one triangle(sohcahtoa)
+##    x3 = x2 * ((-1*math.sin(.5 * fovRx))/( .5 * resolutionx))
+##    #Finds the angle with the side ratio
+##    radains = math.asin(x3)
+##    #Convert to degrees
+##    anglex = (180/math.pi) * radains
+##    #Convert to negative positve range fov where zero is middle 
+##    x4 = anglex +(0.5*fovx)
+##    
+##    pwmx = (x4 * 2.7) + 350
+##    pwm.set_pwm(1,0,int(pwmx))
+##    
+##    
+##    
+##    y2 = center_y - (resolutiony / 2)
+##    y3 = y2 * ((1*math.sin(.5 * fovRy))/( .5 * resolutiony))
+##    radains = math.asin(y3)
+##    angley = (180/math.pi) * radains
+##    resolutiony , resolutionx = image.shape[:2]
     resolutiony , resolutionx = image.shape[:2]
-    
-    fovRx = (math.pi/180) * fovx
-    x2 = center_x - (resolutionx / 2)
-    x3 = x2 * ((-1*math.sin(.5 * fovRx))/( .5 * resolutionx))
-    radains = math.asin(x3)
-    anglex = (180/math.pi) * radains
 
-##    print(anglex)
-    x4 = anglex +(0.5*fovx)
-##    print(int(x4))
-    pwmx = (x4 * 2.7) + 350
-    
-    pwm.set_pwm(1,0,int(pwmx))
-    
-    
-    fovRy = (math.pi/180) * fovy
-    y2 = center_y - (resolutiony / 2)
-    y3 = y2 * ((1*math.sin(.5 * fovRy))/( .5 * resolutiony))
-    radains = math.asin(y3)
-    angley = (180/math.pi) * radains
-
-##    print(anglex)
-    if y4 < 0:
-        y4 = angley * 0
+    if find_angle(center_y, resolutiony, fovy) < 0:
+        angley = angley * 0
     else:
-        y4 = angley +(0.5*fovy)
-##    print(int(y4))
-    pwmy = (y4 * 2.7) + 200
-    print(pwmy)
+        angley = find_angle(center_y, resolutiony, fovy)
+        
+    pwmy = (-angley * 2.7) + 200
     pwm.set_pwm(2,0,int(pwmy))
+    
+    
+##    print(find_angle(center_y, resolutiony, fovy))
+
+    pwmx = (find_angle(center_x, resolutionx, fovx) * 2.7) + 350
+    pwm.set_pwm(1,0,int(pwmx))
 
     
      # Find angle
