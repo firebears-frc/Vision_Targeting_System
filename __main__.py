@@ -11,7 +11,7 @@ fovy = 30
 
 
 #ticks 0 to 180
-xtickMin = 175 
+xtickMin = 175
 xtickMax = 615
 xservorange = 180
 
@@ -19,7 +19,7 @@ xservorange = 180
 xtickrange = xtickMax - xtickMin
 xMiddle = xtickrange / 2
 xoffset = xMiddle + xtickMin
-xfovtickRange = xtickrange * (fovx/xservorange) ##180 is total range of servo in x
+xfovtickRange = xtickrange * fovx / xservorange  ##180 is total range of servo in x
 xticktoFov = xfovtickRange  / fovx
 
 #ticks 0 to  90
@@ -36,6 +36,7 @@ yticktoFov = yfovtickRange  / fovy
 #angletotick(angle, tickoffset, tick Mulitipiler, direction of motor)
 def angletotick(xangle, offset, ticktoFov, direction):
     xo = (ticktoFov * (xangle * direction) + offset) 
+    #print(ticktoFov)
     return int(xo)
 
 
@@ -50,7 +51,7 @@ def find_angle(pixel, resolution, fov):
     ratio = center * (math.sin(.5 * fovtoradains) / (.5 * resolution))
     radians = math.asin(ratio)
     out = (180 / math.pi) * radians
-##    print("Angle: ", int(out), "Pixel :" , pixel) ## Debug print
+#    print("Angle: ", int(out), "Pixel :" , pixel) ## Debug print
     return out
 
 pwm = Adafruit_PCA9685.PCA9685()
@@ -63,7 +64,7 @@ pwm.set_pwm_freq(60)
 pipeline = VisionPipeline()
 WINDOW_NAME = "Vision Targeting"
 # Initialize window
-cv2.namedWindow(WINDOW_NAME)
+#cv2.namedWindow(WINDOW_NAME)
 # Initialize camera
 cap = cv2.VideoCapture(0)
 while not cap.isOpened():
@@ -74,11 +75,11 @@ print ("Capture opened")
 
 os.system("v4l2-ctl --set-ctrl=exposure_auto=1")
 os.system("v4l2-ctl --set-ctrl=exposure_absolute=60")
-while cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
+while True: #cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
     # While the window has not been closed
     
     # Push image to window
-    cv2.imshow(WINDOW_NAME, image)
+   # cv2.imshow(WINDOW_NAME, image)
     cv2.waitKey(10)
     # Read image from the camera
     read, image = cap.read()
@@ -117,7 +118,8 @@ while cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
         
     # Set servos to values
     pwm.set_pwm(1,0,angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
-    pwm.set_pwm(2,0,angletotick(angley, yoffset, yticktoFov, 1))
+    #pwm.set_pwm(2,0,angletotick(angley, yoffset, yticktoFov, 1))
+    #print(angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
 # Loop over
 print ('Pre-camera release')
 cap.release()
