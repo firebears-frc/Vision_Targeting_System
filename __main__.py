@@ -6,62 +6,52 @@ from grip import VisionPipeline
 
 import Adafruit_PCA9685
 
-xtickMin = 175 #0 to 180
+fovx = 40
+fovy = 30
+
+
+#ticks 0 to 180
+xtickMin = 175 
 xtickMax = 615
+xservorange = 180
 
-
-ytickMin = 217#0 to 90
-ytickMax = 430
-
+# Convert angle to servos values
 xtickrange = xtickMax - xtickMin
-#range of xservo in ticks 0 to 180
+xMiddle = xtickrange / 2
+xoffset = xMiddle + xtickMin
+xfovtickRange = xtickrange * (fovx/xservorange) ##180 is total range of servo
+xticktoFov = xfovtickRange  / fovx
 
-xtick = ( 60/180 ) * xtickrange
-#xtick should be 1/3 of the range
+#ticks 0 to  90
+ytickMin = 217
+ytickMax = 430
+yservorange = 90
 
-xangletotick = xtick / 60 #Need to change the 60 value to fov
+ytickrange = ytickMax - ytickMin
+yMiddle = ytickrange / 2
+yoffset = yMiddle + ytickMin
+yfovtickRange = ytickrange * (fovy/yservorange) ##90 is total range of servo in y
+yticktoFov = yfovtickRange  / fovy
 
-
-v1 = xtick + xtickMin
-v2 = ( xtick * 2 ) + xtickMin
-
-##print(v1, v2)
-
-
-def angletotick(xangle):
-    xo = 2.44 * -xangle + 385 ##xangletotick 
-##    print("Tick: ",int(xo))
+#angletotick(angle, tickoffset, tick Mulitipiler, direction of motor)
+def angletotick(xangle, offset, ticktoFov, direction):
+    xo = (ticktoFov * (xangle * direction) + offset) 
     return int(xo)
 
-##print(angletotick(30))
 
 
-##degreetotickx =  (xMax -xMin)
-##op = (degreetotickx / (xMax - xMin))
-##print(op)
-##degreetoticky =  90/(yMax - yMin)
+angley = 0 ##set minimum value for y because it cannot travel passed 0
+#Function to get the angle
 
-pwmM = .75
-xshift = 400
-yshift = 217
-
-fovx = 60
-fovy = 50
-angley = 0
-
+#find_angle(pixel of target, resolution on camera, fov of camera)
 def find_angle(pixel, resolution, fov):
     center = pixel - (resolution / 2)
     fovtoradains = (math.pi/180) * fov
     ratio = center * (math.sin(.5 * fovtoradains) / (.5 * resolution))
     radians = math.asin(ratio)
     out = (180 / math.pi) * radians
-    print("Angle: ", int(out), "Pixel :" , pixel)
+##    print("Angle: ", int(out), "Pixel :" , pixel) ## Debug print
     return out
-
-def fa(pixel, resolution, fov):
-    center = pixel - (resolution / 2)
-    angle = center * (fov/resolution)
-    return angle
 
 pwm = Adafruit_PCA9685.PCA9685()
 
@@ -124,15 +114,10 @@ while cv2.getWindowProperty(WINDOW_NAME, 1) != -1:
         angley = angley * 0
     else:
         angley = find_angle(center_y, resolutiony, fovy)
-    
-    # Convert angle to servos values
-    pwmy = (angley * pwmM) + yshift
-##    pwmx = (find_angle(center_x, resolutionx, fovx) * pwmM) + xshift
-    
+        
     # Set servos to values
-    pwm.set_pwm(1,0,angletotick(find_angle(center_x, resolutionx, fovx)))
-    ##pwm.set_pwm(2,0,int(pwmy))
-##    print(angletotick(find_angle(center_x, resolutionx, fovx)))
+    pwm.set_pwm(1,0,angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
+    pwm.set_pwm(2,0,angletotick(find_angle(center_y, resolutiony, fovy), yoffset, yticktoFov, 1))
 # Loop over
 print ('Pre-camera release')
 cap.release()
@@ -141,3 +126,4 @@ cv2.destroyAllWindows()
 #close window
 
 print ('Program has ended')
+
