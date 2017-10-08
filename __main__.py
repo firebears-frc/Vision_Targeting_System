@@ -74,7 +74,16 @@ read, image = cap.read()
 print ("Capture opened")
 
 os.system("v4l2-ctl --set-ctrl=exposure_auto=1")
-os.system("v4l2-ctl --set-ctrl=exposure_absolute=60")
+os.system("v4l2-ctl --set-ctrl=exposure_absolute=255")
+os.system("v4l2-ctl --set-ctrl=saturation=100")
+os.system("v4l2-ctl --set-ctrl=brightness=126")
+os.system("v4l2-ctl --set-ctrl=gain=60")
+os.system("v4l2-ctl --set-ctrl=white_balance_temperature_auto=0")
+os.system("v4l2-ctl --set-ctrl=white_balance_temperature=0")
+os.system("v4l2-ctl --set-ctrl=contrast=5")
+
+
+
 while cv2.getWindowProperty(WINDOW_NAME, 1) != -1: #True:
     # While the window has not been closed
     

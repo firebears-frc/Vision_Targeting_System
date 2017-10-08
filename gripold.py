@@ -12,38 +12,38 @@ class VisionPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__rgb_threshold_red = [110.07194244604318, 211.48464163822527]
-        self.__rgb_threshold_green = [103.19244604316546, 174.4965870307167]
-        self.__rgb_threshold_blue = [0.0, 111.39931740614334]
-
-        self.rgb_threshold_output = None
-
-
-        self.__hsv_threshold_hue = [17.805755395683452, 44.846416382252556]
-        self.__hsv_threshold_saturation = [77.96762589928056, 255.0]
-        self.__hsv_threshold_value = [0.0, 255.0]
+        self.__hsv_threshold_hue = [79.66101694915254, 117.43315508021391]
+        self.__hsv_threshold_saturation = [36.016949152542374, 141.36363636363635]
+        self.__hsv_threshold_value = [208.0570458887128, 255.0]
 
         self.hsv_threshold_output = None
 
-        self.__cv_bitwise_and_src1 = self.rgb_threshold_output
-        self.__cv_bitwise_and_src2 = self.hsv_threshold_output
+
+        self.__rgb_threshold_red = [0.0, 255.0]
+        self.__rgb_threshold_green = [214.64028776978418, 255.0]
+        self.__rgb_threshold_blue = [146.76258992805754, 255.0]
+
+        self.rgb_threshold_output = None
+
+        self.__cv_bitwise_and_src1 = self.hsv_threshold_output
+        self.__cv_bitwise_and_src2 = self.rgb_threshold_output
 
         self.cv_bitwise_and_output = None
 
         self.__find_contours_input = self.cv_bitwise_and_output
-        self.__find_contours_external_only = True
+        self.__find_contours_external_only = False
 
         self.find_contours_output = None
 
         self.__filter_contours_contours = self.find_contours_output
-        self.__filter_contours_min_area = 500.0
+        self.__filter_contours_min_area = 5.0#2340.0
         self.__filter_contours_min_perimeter = 0.0
         self.__filter_contours_min_width = 0.0
         self.__filter_contours_max_width = 1000.0
         self.__filter_contours_min_height = 0.0
         self.__filter_contours_max_height = 1000.0
         self.__filter_contours_solidity = [0, 100]
-        self.__filter_contours_max_vertices = 1000.0
+        self.__filter_contours_max_vertices = 1000000.0
         self.__filter_contours_min_vertices = 0.0
         self.__filter_contours_min_ratio = 0.0
         self.__filter_contours_max_ratio = 1000.0
@@ -59,17 +59,17 @@ class VisionPipeline:
         """
         Runs the pipeline and sets all outputs to new values.
         """
-        # Step RGB_Threshold0:
-        self.__rgb_threshold_input = source0
-        (self.rgb_threshold_output) = self.__rgb_threshold(self.__rgb_threshold_input, self.__rgb_threshold_red, self.__rgb_threshold_green, self.__rgb_threshold_blue)
-
         # Step HSV_Threshold0:
         self.__hsv_threshold_input = source0
         (self.hsv_threshold_output) = self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue, self.__hsv_threshold_saturation, self.__hsv_threshold_value)
 
+        # Step RGB_Threshold0:
+        self.__rgb_threshold_input = source0
+        (self.rgb_threshold_output) = self.__rgb_threshold(self.__rgb_threshold_input, self.__rgb_threshold_red, self.__rgb_threshold_green, self.__rgb_threshold_blue)
+
         # Step CV_bitwise_and0:
-        self.__cv_bitwise_and_src1 = self.rgb_threshold_output
-        self.__cv_bitwise_and_src2 = self.hsv_threshold_output
+        self.__cv_bitwise_and_src1 = self.hsv_threshold_output
+        self.__cv_bitwise_and_src2 = self.rgb_threshold_output
         (self.cv_bitwise_and_output) = self.__cv_bitwise_and(self.__cv_bitwise_and_src1, self.__cv_bitwise_and_src2)
 
         # Step Find_Contours0:
@@ -86,20 +86,6 @@ class VisionPipeline:
 
 
     @staticmethod
-    def __rgb_threshold(input, red, green, blue):
-        """Segment an image based on color ranges.
-        Args:
-            input: A BGR numpy.ndarray.
-            red: A list of two numbers the are the min and max red.
-            green: A list of two numbers the are the min and max green.
-            blue: A list of two numbers the are the min and max blue.
-        Returns:
-            A black and white numpy.ndarray.
-        """
-        out = cv2.cvtColor(input, cv2.COLOR_BGR2RGB)
-        return cv2.inRange(out, (red[0], green[0], blue[0]),  (red[1], green[1], blue[1]))
-
-    @staticmethod
     def __hsv_threshold(input, hue, sat, val):
         """Segment an image based on hue, saturation, and value ranges.
         Args:
@@ -112,6 +98,20 @@ class VisionPipeline:
         """
         out = cv2.cvtColor(input, cv2.COLOR_BGR2HSV)
         return cv2.inRange(out, (hue[0], sat[0], val[0]),  (hue[1], sat[1], val[1]))
+
+    @staticmethod
+    def __rgb_threshold(input, red, green, blue):
+        """Segment an image based on color ranges.
+        Args:
+            input: A BGR numpy.ndarray.
+            red: A list of two numbers the are the min and max red.
+            green: A list of two numbers the are the min and max green.
+            blue: A list of two numbers the are the min and max blue.
+        Returns:
+            A black and white numpy.ndarray.
+        """
+        out = cv2.cvtColor(input, cv2.COLOR_BGR2RGB)
+        return cv2.inRange(out, (red[0], green[0], blue[0]),  (red[1], green[1], blue[1]))
 
     @staticmethod
     def __cv_bitwise_and(src1, src2):
