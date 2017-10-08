@@ -11,8 +11,8 @@ fovy = 30
 
 
 #ticks 0 to 180
-xtickMin = 175
-xtickMax = 615
+xtickMin = 150
+xtickMax = 575
 xservorange = 180
 
 # Convert angle to servos values
@@ -23,16 +23,17 @@ xfovtickRange = xtickrange * fovx / xservorange  ##180 is total range of servo i
 xticktoFov = xfovtickRange  / fovx
 
 #ticks 0 to  90
-ytickMin = 217
-ytickMax = 430
+ytickMin = 285
+ytickMax = 510
 yservorange = 90
 
 ytickrange = ytickMax - ytickMin
 yMiddle = ytickrange / 2
 yoffset = yMiddle + ytickMin
-yfovtickRange = ytickrange * (fovy/yservorange) ##90 is total range of servo in y
+yfovtickRange = ytickrange * ( float(fovy) / yservorange ) ##90 is total range of servo in y
 yticktoFov = yfovtickRange  / fovy
 
+print(yservorange, fovy)
 #angletotick(angle, tickoffset, tick Mulitipiler, direction of motor)
 def angletotick(xangle, offset, ticktoFov, direction):
     xo = (ticktoFov * (xangle * direction) + offset) 
@@ -51,7 +52,7 @@ def find_angle(pixel, resolution, fov):
     ratio = center * (math.sin(.5 * fovtoradains) / (.5 * resolution))
     radians = math.asin(ratio)
     out = (180 / math.pi) * radians
-#    print("Angle: ", int(out), "Pixel :" , pixel) ## Debug print
+   # print("Angle: ", int(out), "Pixel :" , pixel) ## Debug print
     return out
 
 pwm = Adafruit_PCA9685.PCA9685()
@@ -64,7 +65,7 @@ pwm.set_pwm_freq(60)
 pipeline = VisionPipeline()
 WINDOW_NAME = "Vision Targeting"
 # Initialize window
-cv2.namedWindow(WINDOW_NAME)
+#cv2.namedWindow(WINDOW_NAME)
 # Initialize camera
 cap = cv2.VideoCapture(0)
 while not cap.isOpened():
@@ -72,6 +73,9 @@ while not cap.isOpened():
     cap.open(0)
 read, image = cap.read()
 print ("Capture opened")
+os.system("sh /home/pi/Desktop/VisionTargetingSystem/test.sh")
+os.system("sh /home/pi/Desktop/VisionTargetingSystem/test.sh")
+
 
 
 
@@ -80,9 +84,8 @@ while True: # cv2.getWindowProperty(WINDOW_NAME, 1) != -1: #True:
     # While the window has not been closed
     
     # Push image to window
-    cv2.imshow(WINDOW_NAME, image)
+   # cv2.imshow(WINDOW_NAME, image)
     cv2.waitKey(10)
-    os.system("sh test.sh")
     # Read image from the camera
     read, image = cap.read()
     if not read:
@@ -113,15 +116,29 @@ while True: # cv2.getWindowProperty(WINDOW_NAME, 1) != -1: #True:
     resolutiony , resolutionx = image.shape[:2]
     
     #Cut off for y axis
-    if find_angle(center_y, resolutiony, fovy) < 0:
-        angley = angley * 0
+
+
+    cameraAngley = find_angle(center_y, resolutiony, fovy)
+    cameraAnlgex = find_angle(center_x, resolutionx, fovx)
+
+
+    if cameraAngley > 0:
+        angley =  0
     else:
-        angley = find_angle(center_y, resolutiony, fovy)
-        
+        angley = cameraAngley
+    
+    servoY = angletotick(angley, yoffset, yticktoFov, 1)
+    servoX = angletotick(cameraAnlgex, xoffset, xticktoFov, -1)
+
+    #print(angley)
     # Set servos to values
-    pwm.set_pwm(1,0,angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
-    pwm.set_pwm(2,0,angletotick(angley, yoffset, yticktoFov, 1))
-    #print(angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
+    pwm.set_pwm(1,0,servoX) #angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
+    pwm.set_pwm(2,0, servoY) #angletotick(angley, yoffset, yticktoFov, 1))
+    #print(angletotick(angley, yoffset, yticktoFov, 1))
+   # print(fovy)
+    #print(find_angle(center_y, resolutiony, fovy))
+   # print(find_angle(center_x, resolutionx, fovx))
+   # print(angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
 # Loop over
 print ('Pre-camera release')
 cap.release()

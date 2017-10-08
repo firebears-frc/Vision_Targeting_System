@@ -9,6 +9,3 @@ while true; do
 	fi
 
 done
-
-sh test.sh
-sh test.sh
