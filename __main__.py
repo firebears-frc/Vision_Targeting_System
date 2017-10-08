@@ -64,7 +64,7 @@ pwm.set_pwm_freq(60)
 pipeline = VisionPipeline()
 WINDOW_NAME = "Vision Targeting"
 # Initialize window
-#cv2.namedWindow(WINDOW_NAME)
+cv2.namedWindow(WINDOW_NAME)
 # Initialize camera
 cap = cv2.VideoCapture(0)
 while not cap.isOpened():
@@ -73,14 +73,6 @@ while not cap.isOpened():
 read, image = cap.read()
 print ("Capture opened")
 
-os.system("v4l2-ctl --set-ctrl=exposure_auto=1")
-os.system("v4l2-ctl --set-ctrl=exposure_absolute=255")
-os.system("v4l2-ctl --set-ctrl=saturation=100")
-os.system("v4l2-ctl --set-ctrl=brightness=126")
-os.system("v4l2-ctl --set-ctrl=gain=60")
-os.system("v4l2-ctl --set-ctrl=white_balance_temperature_auto=0")
-os.system("v4l2-ctl --set-ctrl=white_balance_temperature=0")
-os.system("v4l2-ctl --set-ctrl=contrast=5")
 
 
 
@@ -88,8 +80,9 @@ while True: # cv2.getWindowProperty(WINDOW_NAME, 1) != -1: #True:
     # While the window has not been closed
     
     # Push image to window
-   # cv2.imshow(WINDOW_NAME, image)
+    cv2.imshow(WINDOW_NAME, image)
     cv2.waitKey(10)
+    os.system("sh test.sh")
     # Read image from the camera
     read, image = cap.read()
     if not read:
@@ -127,7 +120,7 @@ while True: # cv2.getWindowProperty(WINDOW_NAME, 1) != -1: #True:
         
     # Set servos to values
     pwm.set_pwm(1,0,angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
-    #pwm.set_pwm(2,0,angletotick(angley, yoffset, yticktoFov, 1))
+    pwm.set_pwm(2,0,angletotick(angley, yoffset, yticktoFov, 1))
     #print(angletotick(find_angle(center_x, resolutionx, fovx), xoffset, xticktoFov, -1))
 # Loop over
 print ('Pre-camera release')

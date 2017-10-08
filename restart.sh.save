@@ -1,0 +1,29 @@
+#!/bin/bash
+
+v4l2-ctl --set-ctrl=exposure_auto=1
+v4l2-ctl --set-ctrl=exposure_absolute=255
+v4l2-ctl --set-ctrl=saturation=100
+v4l2-ctl --set-ctrl=brightness=126
+v4l2-ctl --set-ctrl=gain=60
+v4l2-ctl --set-ctrl=white_balance_temperature_auto=0
+v4l2-ctl --set-ctrl=white_balance_temperature=0
+v4l2-ctl --set-ctrl=contrast=5
+os.system("v4l2-ctl --set-ctrl=exposure_auto=1")
+os.system("v4l2-ctl --set-ctrl=exposure_absolute=255")
+os.system("v4l2-ctl --set-ctrl=saturation=100")
+os.system("v4l2-ctl --set-ctrl=brightness=126")
+os.system("v4l2-ctl --set-ctrl=gain=60")
+os.system("v4l2-ctl --set-ctrl=white_balance_temperature_auto=0")
+os.system("v4l2-ctl --set-ctrl=white_balance_temperature=0")
+os.system("v4l2-ctl --set-ctrl=contrast=5")
+
+
+while true; do
+	if  lsusb | grep -q Webcam
+		then
+		python /home/pi/Desktop/VisionTargetingSystem/
+		break
+	fi
+
+done
+
